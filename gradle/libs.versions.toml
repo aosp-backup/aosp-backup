@@ -19,7 +19,7 @@ lint-rules = { strictly = "0.1.0" }
 # https://android.googlesource.com/platform/external/protobuf/+/refs/tags/android-14.0.0_r1/java/pom.xml#7
 protobuf = { strictly = "3.21.7" }
 # https://android.googlesource.com/platform/prebuilts/sdk/+/refs/tags/android-14.0.0_r1/current/extras/material-design-x/Android.bp#15
-material = { strictly = "1.7.0-alpha03" }
+material = { strictly = "1.12.0-alpha03" }
 hilt = { strictly = "2.50" }
 
 # Coroutines versions
@@ -28,9 +28,10 @@ coroutines = { strictly = "1.6.4" }
 
 # AndroidX versions
 # https://android.googlesource.com/platform/prebuilts/sdk/+/refs/tags/android-14.0.0_r1/current/androidx/Android.bp
-androidx-core = { strictly = "1.9.0-alpha05" }
-androidx-activity-compose = { strictly = "1.7.0-beta02" }
-androidx-compose-material3 = { strictly = "1.1.0-alpha06" }
+androidx-core = { strictly = "1.13.0-alpha03" }
+androidx-appcompat = { strictly = "1.7.0-alpha03" }
+androidx-compose-bom = { strictly = "2023.10.01" }
+androidx-preference = { strictly = "1.2.1" }
 
 # Test Versions
 junit = "4.13.2"
@@ -43,10 +44,19 @@ material = { group = "com.google.android.material", name = "material", version.r
 hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 
-# AndroidX Libraries
+# AndroidX Base Libraries
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity-compose" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "androidx-compose-material3" }
+androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "androidx-preference" }
+
+# AndroidX Compose Libraries
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidx-compose-bom" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose" }
 
 # Test Libraries
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -4,9 +4,13 @@ import android.app.backup.BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER
 import android.app.backup.BackupTransport
 import android.content.ComponentName
 import android.content.Context
+import com.stevesoltys.aosp_backup.manager.backup.BackupManager
+import com.stevesoltys.aosp_backup.manager.storage.StorageManager
 
 class AppBackupTransport(
-  private val context: Context
+  private val context: Context,
+  private val backupManager: BackupManager,
+  private val storageManager: StorageManager
 ) : BackupTransport() {
 
   companion object {
