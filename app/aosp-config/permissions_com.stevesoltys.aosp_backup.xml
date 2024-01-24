@@ -3,5 +3,6 @@
     <privapp-permissions package="com.stevesoltys.aosp_backup">
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+        <permission name="android.permission.INSTALL_PACKAGES"/>
     </privapp-permissions>
 </permissions>

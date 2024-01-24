@@ -3,16 +3,15 @@ package com.stevesoltys.aosp_backup.transport
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.stevesoltys.aosp_backup.manager.backup.BackupManager
-import com.stevesoltys.aosp_backup.manager.storage.StorageManager
+import com.stevesoltys.aosp_backup.manager.backup.backup.BackupManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AppBackupTransportService @Inject constructor(
-  private val backupManager: BackupManager,
-  private val storageManager: StorageManager
-) : Service() {
+class AppBackupTransportService : Service() {
+
+  @Inject
+  lateinit var backupManager: BackupManager
 
   private var transport: AppBackupTransport? = null
 
@@ -21,13 +20,13 @@ class AppBackupTransportService @Inject constructor(
 
     transport = AppBackupTransport(
       context = applicationContext,
-      backupManager = backupManager,
-      storageManager = storageManager
+      backupManager = backupManager
     )
   }
 
   override fun onBind(intent: Intent?): IBinder {
-    return transport?.binder ?: throw IllegalStateException("Transport not initialized")
+    return transport?.binder
+      ?: throw IllegalStateException("Transport not initialized")
   }
 
   override fun onDestroy() {

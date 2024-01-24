@@ -78,7 +78,7 @@ $ADB wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sle
 echo "Setting backup transport to aosp_backup..."
 $ADB shell bmgr enable true
 sleep 5
-$ADB shell bmgr transport com.stevesoltys.aosp_backup.transport.AppBackupTransport
+$ADB shell bmgr transport com.stevesoltys.aosp_backup/.transport.AppBackupTransport
 
 echo "Downloading and extracting test backup to '/sdcard/aosp_backup_baseline'..."
 

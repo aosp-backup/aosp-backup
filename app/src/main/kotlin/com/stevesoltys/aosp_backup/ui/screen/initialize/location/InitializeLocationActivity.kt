@@ -2,6 +2,7 @@ package com.stevesoltys.aosp_backup.ui.screen.initialize.location
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -31,8 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stevesoltys.aosp_backup.R
-import com.stevesoltys.aosp_backup.manager.storage.StorageManager
-import com.stevesoltys.aosp_backup.manager.storage.location.BackupLocation
+import com.stevesoltys.aosp_backup.manager.location.BackupLocationManager
 import com.stevesoltys.aosp_backup.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -41,23 +41,36 @@ import javax.inject.Inject
 class InitializeLocationActivity : ComponentActivity() {
 
   @Inject
-  lateinit var storageManager: StorageManager
+  lateinit var backupLocationManager: BackupLocationManager
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     actionBar?.hide()
 
-    setContent {
-      Content(
-        backupLocations = storageManager.backupLocations()
+    val backupLocations = backupLocationManager.backupLocationTypes().map {
+
+      val launcher = it.locationSelectionActivity(this) {
+        backupLocationManager.setBackupLocationType(it)
+
+        Toast.makeText(this, "Backup location selected!", Toast.LENGTH_SHORT).show()
+      }
+
+      InitializeLocationEntry(
+        name = it.name(),
+        icon = it.icon(),
+        onClick = { launcher.launch(Unit) }
       )
+    }
+
+    setContent {
+      Content(backupLocations = backupLocations)
     }
   }
 
   @Preview(uiMode = UI_MODE_NIGHT_YES)
   @Composable
   private fun Content(
-    backupLocations: List<BackupLocation> = emptyList()
+    backupLocations: List<InitializeLocationEntry> = emptyList()
   ) {
     AppTheme {
       Surface {
@@ -102,11 +115,10 @@ class InitializeLocationActivity : ComponentActivity() {
   }
 
   @Composable
-  fun BackupLocationList(backupLocations: List<BackupLocation>) {
+  fun BackupLocationList(backupLocations: List<InitializeLocationEntry>) {
     Spacer(modifier = Modifier.height(48.dp))
     LazyColumn(
-      modifier = Modifier
-        .fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
       items(backupLocations) { location ->
@@ -116,7 +128,7 @@ class InitializeLocationActivity : ComponentActivity() {
   }
 
   @Composable
-  fun BackupLocationRow(location: BackupLocation) {
+  fun BackupLocationRow(location: InitializeLocationEntry) {
     Button(
       modifier = Modifier
         .fillMaxWidth(0.75f)
@@ -125,19 +137,17 @@ class InitializeLocationActivity : ComponentActivity() {
         containerColor = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
       ),
-      onClick = {
-        startActivity(location.selectionIntent())
-      },
+      onClick = { location.onClick() },
     ) {
       Icon(
-        imageVector = ImageVector.vectorResource(id = location.icon()),
+        imageVector = ImageVector.vectorResource(id = location.icon),
         contentDescription = "Storage Location Icon",
         tint = MaterialTheme.colorScheme.onSecondaryContainer,
         modifier = Modifier.size(36.dp)
       )
       Spacer(modifier = Modifier.width(16.dp))
       Text(
-        text = location.name(),
+        text = location.name,
         color = MaterialTheme.colorScheme.onSecondaryContainer,
         fontSize = 18.sp,
       )

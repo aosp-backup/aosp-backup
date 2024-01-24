@@ -1,4 +1,4 @@
-package com.stevesoltys.aosp_backup.manager.storage.location
+package com.stevesoltys.aosp_backup.manager.location
 
 enum class BackupLocationType {
   SHARED_STORAGE,

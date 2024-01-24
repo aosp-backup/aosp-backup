@@ -30,6 +30,8 @@ $ADB push $ROOT_PROJECT_DIR/app/build/outputs/apk/release/app-release.apk /syste
 echo "Installing aosp_backup permissions..."
 $ADB push $ROOT_PROJECT_DIR/app/aosp-config/permissions_com.stevesoltys.aosp_backup.xml /system/etc/permissions/privapp-permissions-aosp_backup.xml
 $ADB push $ROOT_PROJECT_DIR/app/aosp-config/allowlist_com.stevesoltys.aosp_backup.xml /system/etc/sysconfig/allowlist-aosp_backup.xml
+$ADB shell am force-stop com.stevesoltys.aosp_backup
+$ADB shell am broadcast -a android.intent.action.BOOT_COMPLETED
 
 echo "Setting aosp_backup transport..."
-$ADB shell bmgr transport com.stevesoltys.aosp_backup.transport.AppBackupTransport
+$ADB shell bmgr transport com.stevesoltys.aosp_backup/.transport.AppBackupTransport

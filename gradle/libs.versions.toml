@@ -58,6 +58,12 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose" }
 
+# Apache Commons Compress
+apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.25.0" }
+
+# Result Monad
+result4k = { group = "dev.forkhandles", name = "result4k", version = "2.12.2.0" }
+
 # Test Libraries
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 hilt-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }

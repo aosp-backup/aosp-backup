@@ -13,10 +13,6 @@ class ConfigurationManager @Inject constructor(
   private val context: Context
 ) {
 
-  companion object {
-    private const val PREF_KEY_STORAGE_LOCATION = "storage_location"
-  }
-
   private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
 
   fun sharedPreferences(): SharedPreferences {
