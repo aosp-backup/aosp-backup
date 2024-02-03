@@ -7,7 +7,7 @@ import android.app.backup.BackupTransport.TRANSPORT_OK
 import android.content.pm.PackageInfo
 import android.os.ParcelFileDescriptor
 import com.stevesoltys.aosp_backup.manager.backup.backup.BackupManagerState
-import com.stevesoltys.aosp_backup.manager.location.BackupLocationManager
+import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlanManager
 import com.stevesoltys.aosp_backup.util.toSuccess
 import dev.forkhandles.result4k.Result
 import dev.forkhandles.result4k.resultFrom
@@ -17,7 +17,7 @@ import javax.inject.Singleton
 
 @Singleton
 class KeyValueBackupManager @Inject constructor(
-  private val backupLocationManager: BackupLocationManager
+  private val backupPlanManager: BackupPlanManager
 ) {
 
   companion object {
@@ -45,7 +45,7 @@ class KeyValueBackupManager @Inject constructor(
   }
 
   private fun performBackup(packageInfo: PackageInfo, socket: ParcelFileDescriptor): KeyValueBackupResult {
-    val backupLocation = backupLocationManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupLocationType()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     backupLocation.keyValueBackupOutputStream(packageInfo.packageName)

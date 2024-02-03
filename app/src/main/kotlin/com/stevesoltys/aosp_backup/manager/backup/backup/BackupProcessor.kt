@@ -4,7 +4,9 @@ import android.app.backup.BackupProgress
 import android.app.backup.IBackupObserver
 import android.util.Log
 import com.stevesoltys.aosp_backup.manager.backup.SystemBackupManager
+import com.stevesoltys.aosp_backup.util.toFailure
 import dev.forkhandles.result4k.Result
+import dev.forkhandles.result4k.mapFailure
 import dev.forkhandles.result4k.onFailure
 import dev.forkhandles.result4k.resultFrom
 
@@ -40,7 +42,12 @@ class BackupProcessor(
     val currentChunk = packageChunks[currentChunkIndex]
 
     Log.i(TAG, "Starting backup for chunk $currentChunkIndex of ${packageChunks.size - 1} with packages: ${currentChunk.joinToString(", ")}.")
+
     systemBackupManager.requestBackup(this, currentChunk)
+      .mapFailure {
+        Log.e(TAG, "Backup failed for chunk $currentChunkIndex", it)
+        backupFinished(-1)
+      }
   }
 
   override fun onUpdate(currentPackage: String?, backupProgress: BackupProgress) {

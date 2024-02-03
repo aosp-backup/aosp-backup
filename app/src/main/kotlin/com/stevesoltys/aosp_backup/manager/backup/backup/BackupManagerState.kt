@@ -22,9 +22,7 @@ data class BackupManagerState(
   fun reset() {
     Log.i(TAG, "Resetting backup state, was previously: ${currentPackage.packageName}")
 
-    outputStream.flush()
     closeQuietly(outputStream)
-
     closeQuietly(inputStream)
     closeQuietly(inputSocket)
   }

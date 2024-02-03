@@ -1,37 +1,33 @@
 [versions]
 # Android SDK versions
 compileSdk = "34"
-minSdk = "33"
+minSdk = "34"
 targetSdk = "34"
 
 # Plugin Versions
-android-gradle-plugin = "8.1.2"
+android-gradle-plugin = "8.2.2"
 hilt-plugin = "2.50"
 
 # Kotlin versions
-# https://android.googlesource.com/platform/external/kotlinc/+/refs/tags/android-14.0.0_r1/build.txt
-aosp-kotlin = { strictly = "1.8.10" }
+kotlin = "1.8.10"
 
 # Lint versions
-lint-rules = { strictly = "0.1.0" }
+lint-rules = "0.1.0"
 
 # Google versions
-# https://android.googlesource.com/platform/external/protobuf/+/refs/tags/android-14.0.0_r1/java/pom.xml#7
-protobuf = { strictly = "3.21.7" }
-# https://android.googlesource.com/platform/prebuilts/sdk/+/refs/tags/android-14.0.0_r1/current/extras/material-design-x/Android.bp#15
-material = { strictly = "1.12.0-alpha03" }
-hilt = { strictly = "2.50" }
+protobuf = "3.21.7"
+material = "1.12.0-alpha03"
+hilt = "2.50"
+tinkAndroid = "1.10.0"
 
 # Coroutines versions
-# https://android.googlesource.com/platform/external/kotlinx.coroutines/+/refs/tags/android-14.0.0_r1/CHANGES.md
-coroutines = { strictly = "1.6.4" }
+coroutines = "1.6.4"
 
 # AndroidX versions
-# https://android.googlesource.com/platform/prebuilts/sdk/+/refs/tags/android-14.0.0_r1/current/androidx/Android.bp
-androidx-core = { strictly = "1.13.0-alpha03" }
-androidx-appcompat = { strictly = "1.7.0-alpha03" }
-androidx-compose-bom = { strictly = "2023.10.01" }
-androidx-preference = { strictly = "1.2.1" }
+androidx-core = "1.13.0-alpha04"
+androidx-appcompat = "1.7.0-alpha03"
+androidx-compose-bom = "2024.01.00"
+androidx-preference = "1.2.1"
 
 # Test Versions
 junit = "4.13.2"
@@ -43,6 +39,7 @@ mockk = "1.13.4"
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tinkAndroid" }
 
 # AndroidX Base Libraries
 androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
@@ -70,8 +67,8 @@ hilt-testing = { group = "com.google.dagger", name = "hilt-android-testing", ver
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
-org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "aosp-kotlin" }
-org-jetbrains-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "aosp-kotlin" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+org-jetbrains-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 com-google-dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt-plugin" }
 
 [bundles]

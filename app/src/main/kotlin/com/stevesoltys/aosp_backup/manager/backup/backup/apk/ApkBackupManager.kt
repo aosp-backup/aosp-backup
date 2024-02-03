@@ -2,8 +2,8 @@ package com.stevesoltys.aosp_backup.manager.backup.backup.apk
 
 import android.content.pm.PackageInfo
 import android.util.Log
-import com.stevesoltys.aosp_backup.manager.location.BackupLocationManager
-import com.stevesoltys.aosp_backup.manager.pkg.PackageManager
+import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlanManager
+import com.stevesoltys.aosp_backup.manager.package_.PackageManager
 import dev.forkhandles.result4k.Result
 import dev.forkhandles.result4k.resultFrom
 import java.io.File
@@ -14,7 +14,7 @@ import javax.inject.Singleton
 @Singleton
 class ApkBackupManager @Inject constructor(
   private val packageManager: PackageManager,
-  private val backupLocationManager: BackupLocationManager
+  private val backupPlanManager: BackupPlanManager
 ) {
 
   companion object {
@@ -23,7 +23,7 @@ class ApkBackupManager @Inject constructor(
 
   fun backupApks(): Result<Unit, Exception> = resultFrom {
     val apkEligiblePackages = packageManager.getApkEligiblePackages()
-    val backupLocation = backupLocationManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupLocationType()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     Log.i(TAG, "Backing up ${apkEligiblePackages.size} APK(s).")

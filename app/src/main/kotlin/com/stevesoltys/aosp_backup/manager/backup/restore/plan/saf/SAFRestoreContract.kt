@@ -1,32 +1,21 @@
-package com.stevesoltys.aosp_backup.manager.location.saf
+package com.stevesoltys.aosp_backup.manager.backup.restore.plan.saf
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.EXTRA_LOCAL_ONLY
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.CallSuper
 
-class SAFBackupLocationContract(
+class SAFRestoreContract(
   private val activity: ComponentActivity
 ) : ActivityResultContract<Unit, Uri?>() {
 
   @CallSuper
   override fun createIntent(context: Context, input: Unit): Intent {
-    return Intent(Intent.ACTION_CREATE_DOCUMENT)
-      .setType("application/zip")
-      .apply {
-        addCategory(Intent.CATEGORY_OPENABLE)
-        putExtra(EXTRA_LOCAL_ONLY, true)
-
-        addFlags(
-          Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or
-            Intent.FLAG_GRANT_READ_URI_PERMISSION or
-            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-        )
-      }
+    return Intent(Intent.ACTION_OPEN_DOCUMENT)
+      .setType("*/*")
   }
 
   override fun getSynchronousResult(
@@ -41,9 +30,8 @@ class SAFBackupLocationContract(
       .takeIf { resultCode == Activity.RESULT_OK }?.data
       ?: return null
 
-    // Make sure we have permanent read/write access to the URI
-    val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-      Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+    // Make sure we have permanent read access to the URI
+    val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
 
     activity.contentResolver.takePersistableUriPermission(result, flags)
     return result

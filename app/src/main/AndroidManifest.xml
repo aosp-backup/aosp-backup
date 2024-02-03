@@ -40,7 +40,7 @@
 
     <activity
       android:name=".ui.screen.settings.SettingsActivity"
-      android:exported="true"/>
+      android:exported="true" />
 
     <activity
       android:name=".ui.screen.initialize.InitializationActivity"
@@ -48,6 +48,10 @@
 
     <activity
       android:name=".ui.screen.initialize.location.InitializeLocationActivity"
+      android:exported="true" />
+
+    <activity
+      android:name=".ui.screen.restore.RestoreActivity"
       android:exported="true" />
 
     <service

@@ -1,4 +1,4 @@
-package com.stevesoltys.aosp_backup.manager.location.saf
+package com.stevesoltys.aosp_backup.manager.backup.backup.plan.saf
 
 import android.content.Context
 import android.net.Uri
@@ -7,21 +7,29 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import com.stevesoltys.aosp_backup.R
 import com.stevesoltys.aosp_backup.manager.configuration.ConfigurationManager
-import com.stevesoltys.aosp_backup.manager.location.BackupLocation
-import com.stevesoltys.aosp_backup.manager.location.BackupLocationType
+import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlan
+import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlanType
+import com.stevesoltys.aosp_backup.manager.security.stream.EncryptedStreamManager
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.forkhandles.result4k.Result
 import dev.forkhandles.result4k.resultFrom
+import java.io.IOException
 import java.io.OutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class SAFBackupLocation(
+@Singleton
+class SAFBackupPlan @Inject constructor(
+  @ApplicationContext
   private val context: Context,
-  private val configurationManager: ConfigurationManager
-) : BackupLocation() {
+  private val configurationManager: ConfigurationManager,
+  private val encryptedStreamManager: EncryptedStreamManager
+) : BackupPlan() {
 
   companion object {
-    private val TAG = SAFBackupLocation::class.java.simpleName
+    private val TAG = SAFBackupPlan::class.java.simpleName
 
     private const val PREF_BACKUP_LOCATION_URI = "backup_location_uri"
     private const val KEY_VALUE_TYPE = "kv"
@@ -36,7 +44,7 @@ class SAFBackupLocation(
     callback: () -> Unit
   ): ActivityResultLauncher<Unit> {
     return activity.registerForActivityResult(
-      SAFBackupLocationContract(activity)
+      SAFBackupPlanContract(activity)
     ) { uri ->
       setBackupLocationUri(uri.toString())
 
@@ -57,7 +65,11 @@ class SAFBackupLocation(
 
     val fileUri = Uri.parse(path)
     val safOutputStream = context.contentResolver.openOutputStream(fileUri)
-    backupOutputStream = ZipOutputStream(safOutputStream)
+      ?: throw IOException("Could not open output stream for URI: $fileUri")
+
+    val backupOutputStream = encryptedStreamManager.getBackupOutputStream(safOutputStream)
+
+    this.backupOutputStream = ZipOutputStream(backupOutputStream)
   }
 
   override fun keyValueBackupOutputStream(identifier: String): OutputStream {
@@ -78,12 +90,12 @@ class SAFBackupLocation(
     backupOutputStream = null
   }
 
-  override fun type(): BackupLocationType {
-    return BackupLocationType.SHARED_STORAGE
+  override fun type(): BackupPlanType {
+    return BackupPlanType.SHARED_STORAGE
   }
 
   override fun name(): String {
-    return "Shared storage"
+    return "Shared Storage"
   }
 
   override fun icon(): Int {
@@ -93,21 +105,15 @@ class SAFBackupLocation(
   override fun excludedPackages(): List<String> {
     val uri = getBackupLocationUri() ?: return emptyList()
     val authority = Uri.parse(uri).authority ?: return emptyList()
+    val contentProviderPackage = context.packageManager.resolveContentProvider(authority, 0)
 
-    val contentProviderPackages = context.packageManager.resolveContentProvider(authority, 0)
-      ?.let {
-        // Find all content providers with the given process name.
-        context.packageManager.queryContentProviders(it.processName, 0, 0)
-      }?.map { it.packageName }
-
-    return contentProviderPackages.orEmpty()
+    return listOfNotNull(contentProviderPackage?.packageName)
   }
 
   private fun outputStream(type: String, identifier: String): OutputStream {
     val outputStream = backupOutputStream
       ?: throw IllegalStateException("Backup output stream is not initialized.")
 
-    Log.i("SharedStorageBackupLocation", "Writing $type/$identifier")
     outputStream.putNextEntry(ZipEntry("$type/$identifier"))
 
     return object : OutputStream() {

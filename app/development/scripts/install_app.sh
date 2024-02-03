@@ -24,12 +24,14 @@ sleep 3      # wait for adb to restart
 $ADB remount # remount /system as writable
 
 echo "Installing aosp_backup app..."
-$ADB shell mkdir -p /system/priv-app/aosp_backup
-$ADB push $ROOT_PROJECT_DIR/app/build/outputs/apk/release/app-release.apk /system/priv-app/aosp_backup/aosp_backup.apk
+$ADB shell mkdir -p /system/priv-app/AospBackup
+$ADB shell rm -f /system/priv-app/AospBackup/AospBackup.apk
+$ADB push $ROOT_PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk /system/priv-app/AospBackup/AospBackup.apk
 
 echo "Installing aosp_backup permissions..."
 $ADB push $ROOT_PROJECT_DIR/app/aosp-config/permissions_com.stevesoltys.aosp_backup.xml /system/etc/permissions/privapp-permissions-aosp_backup.xml
 $ADB push $ROOT_PROJECT_DIR/app/aosp-config/allowlist_com.stevesoltys.aosp_backup.xml /system/etc/sysconfig/allowlist-aosp_backup.xml
+
 $ADB shell am force-stop com.stevesoltys.aosp_backup
 $ADB shell am broadcast -a android.intent.action.BOOT_COMPLETED
 

@@ -21,7 +21,6 @@ class SettingsViewModel @Inject constructor(
 
   fun runBackup() {
     viewModelScope.launch(Dispatchers.IO) {
-
       backupManager.runBackup()
         .mapFailure {
           Log.e(TAG, "Failed to run backup", it)

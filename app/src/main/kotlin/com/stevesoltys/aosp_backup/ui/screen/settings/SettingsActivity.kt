@@ -51,7 +51,7 @@ class SettingsActivity : ComponentActivity() {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
           ) {
-            ContinueButton()
+            RunBackupButton()
           }
         }
       }
@@ -59,7 +59,7 @@ class SettingsActivity : ComponentActivity() {
   }
 
   @Composable
-  private fun ContinueButton() {
+  private fun RunBackupButton() {
     Column(
       modifier = Modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally,

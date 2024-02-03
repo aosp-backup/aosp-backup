@@ -7,8 +7,9 @@ import com.stevesoltys.aosp_backup.manager.backup.SystemBackupManager
 import com.stevesoltys.aosp_backup.manager.backup.backup.apk.ApkBackupManager
 import com.stevesoltys.aosp_backup.manager.backup.backup.full.FullBackupManager
 import com.stevesoltys.aosp_backup.manager.backup.backup.kv.KeyValueBackupManager
-import com.stevesoltys.aosp_backup.manager.location.BackupLocationManager
-import com.stevesoltys.aosp_backup.manager.pkg.PackageManager
+import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlanManager
+import com.stevesoltys.aosp_backup.manager.package_.PackageManager
+import com.stevesoltys.aosp_backup.util.AOSP.PACKAGE_MANAGER_SENTINEL
 import com.stevesoltys.aosp_backup.util.toSuccess
 import dev.forkhandles.result4k.Result
 import dev.forkhandles.result4k.map
@@ -25,7 +26,7 @@ import javax.inject.Singleton
 class BackupManager @Inject constructor(
   private val systemBackupManager: SystemBackupManager,
   private val packageManager: PackageManager,
-  private val backupLocationManager: BackupLocationManager,
+  private val backupPlanManager: BackupPlanManager,
   private val fullBackupManager: FullBackupManager,
   private val keyValueBackupManager: KeyValueBackupManager,
   private val apkBackupManager: ApkBackupManager
@@ -41,7 +42,7 @@ class BackupManager @Inject constructor(
    * Initialize the backup location for the current user.
    */
   fun initializeBackupLocation(): Result<Unit, Exception> = resultFrom {
-    val backupLocation = backupLocationManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupLocationType()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     backupLocation.initializeLocation()
@@ -50,10 +51,13 @@ class BackupManager @Inject constructor(
 
   /**
    * Run a backup for the current user using a [BackupProcessor].
+   *
+   * We always have to include the package manager sentinel, since the metadata is used during restores.
    */
   fun runBackup(): Result<Unit, Exception> = resultFrom {
     val packages = packageManager.getAppDataEligiblePackages()
       .map { it.packageName }
+      .plus(PACKAGE_MANAGER_SENTINEL)
 
     val backupProcessor = BackupProcessor(
       systemBackupManager = systemBackupManager,
@@ -71,7 +75,7 @@ class BackupManager @Inject constructor(
    * This will be called by a [BackupProcessor] when it is ready to start a backup.
    */
   fun initializeBackup(): Result<Unit, Exception> = resultFrom {
-    val backupLocation = backupLocationManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupLocationType()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     Log.i(TAG, "Initializing backup.")
@@ -86,7 +90,7 @@ class BackupManager @Inject constructor(
    * This will be called by a [BackupProcessor] when it is ready to finalize a backup.
    */
   fun finalizeBackup(): Result<Unit, Exception> = resultFrom {
-    val backupLocation = backupLocationManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupLocationType()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     apkBackupManager.backupApks().mapFailure {

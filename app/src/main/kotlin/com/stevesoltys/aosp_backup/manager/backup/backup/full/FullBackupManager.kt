@@ -4,7 +4,7 @@ import android.app.backup.BackupTransport.TRANSPORT_OK
 import android.content.pm.PackageInfo
 import android.os.ParcelFileDescriptor
 import com.stevesoltys.aosp_backup.manager.backup.backup.BackupManagerState
-import com.stevesoltys.aosp_backup.manager.location.BackupLocationManager
+import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlanManager
 import dev.forkhandles.result4k.Result
 import dev.forkhandles.result4k.resultFrom
 import java.io.FileInputStream
@@ -14,7 +14,7 @@ import javax.inject.Singleton
 
 @Singleton
 class FullBackupManager @Inject constructor(
-  private val backupLocationManager: BackupLocationManager
+  private val backupPlanManager: BackupPlanManager
 ) {
 
   fun initializePackageForBackup(
@@ -31,7 +31,7 @@ class FullBackupManager @Inject constructor(
       val inputStream = FileInputStream(socket.fileDescriptor)
 
       // Create the output stream from the backup location.
-      val outputStream = backupLocationManager.backupLocationType()
+      val outputStream = backupPlanManager.backupLocationType()
         ?.fullBackupOutputStream(packageInfo.packageName)
         ?: throw IllegalStateException("Backup location is not initialized.")
 

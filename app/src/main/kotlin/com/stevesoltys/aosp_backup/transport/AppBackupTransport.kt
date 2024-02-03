@@ -3,6 +3,7 @@ package com.stevesoltys.aosp_backup.transport
 import android.app.backup.BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER
 import android.app.backup.BackupTransport
 import android.app.backup.RestoreDescription
+import android.app.backup.RestoreDescription.NO_MORE_PACKAGES
 import android.app.backup.RestoreSet
 import android.content.ComponentName
 import android.content.Context
@@ -10,6 +11,7 @@ import android.content.pm.PackageInfo
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.stevesoltys.aosp_backup.manager.backup.backup.BackupManager
+import com.stevesoltys.aosp_backup.manager.backup.restore.RestoreManager
 import dev.forkhandles.result4k.get
 import dev.forkhandles.result4k.map
 import dev.forkhandles.result4k.mapFailure
@@ -17,7 +19,8 @@ import java.util.concurrent.TimeUnit
 
 class AppBackupTransport(
   private val context: Context,
-  private val backupManager: BackupManager
+  private val backupManager: BackupManager,
+  private val restoreManager: RestoreManager
 ) : BackupTransport() {
 
   companion object {
@@ -213,42 +216,101 @@ class AppBackupTransport(
 
   // Restore
 
-  override fun getAvailableRestoreSets(): Array<RestoreSet> {
+  override fun getAvailableRestoreSets(): Array<RestoreSet>? {
     Log.i(TAG, "Getting available restore sets")
-    return emptyArray()
+
+    return restoreManager.getAvailableRestoreSets()
+      .map { it.toTypedArray() }
+      .mapFailure {
+        Log.e(TAG, "Error getting available restore sets", it)
+        null
+      }
+      .get()
   }
 
   override fun getCurrentRestoreSet(): Long {
     Log.i(TAG, "Getting current restore set")
-    return 0
+
+    return restoreManager.getCurrentRestoreSet()
+      .map { it.token }
+      .mapFailure {
+        Log.e(TAG, "Error getting current restore set", it)
+        0L
+      }
+      .get()
   }
 
   override fun startRestore(token: Long, packages: Array<PackageInfo>): Int {
-    Log.i(TAG, "Starting restore for token $token")
-    return TRANSPORT_OK
+    Log.i(TAG, "Starting restore for token $token and packages: ${packages.map { it.packageName }}")
+
+    return restoreManager.startRestore(packages)
+      .map { TRANSPORT_OK }
+      .mapFailure {
+        Log.e(TAG, "Error starting restore", it)
+        TRANSPORT_ERROR
+      }
+      .get()
   }
 
-  override fun getNextFullRestoreDataChunk(socket: ParcelFileDescriptor): Int {
-    Log.i(TAG, "Getting next full restore data chunk")
-    return TRANSPORT_OK
+  override fun getNextFullRestoreDataChunk(fileDescriptor: ParcelFileDescriptor): Int {
+
+    return restoreManager.getRestoreChunk(fileDescriptor, true)
+      .map { it }
+      .mapFailure {
+        Log.e(TAG, "Error getting next full restore data chunk", it)
+        TRANSPORT_ERROR
+      }
+      .get()
   }
 
   override fun nextRestorePackage(): RestoreDescription? {
     Log.i(TAG, "Getting next restore package")
-    return null
+
+    return restoreManager.getNextRestorePackage()
+      .map { result ->
+        if (result == null) {
+          NO_MORE_PACKAGES
+        } else {
+          RestoreDescription(result.packageName, result.type.identifier!!)
+        }
+      }
+      .mapFailure {
+        Log.e(TAG, "Error getting next restore package", it)
+        null
+      }
+      .get()
   }
 
-  override fun getRestoreData(outputFileDescriptor: ParcelFileDescriptor): Int {
-    Log.i(TAG, "Getting restore data")
-    return TRANSPORT_OK
+  override fun getRestoreData(fileDescriptor: ParcelFileDescriptor): Int {
+    Log.i(TAG, "Getting K/V restore data")
+
+    return restoreManager.getRestoreChunk(fileDescriptor, false)
+      .map { TRANSPORT_OK }
+      .mapFailure {
+        Log.e(TAG, "Error getting next full restore data chunk", it)
+        TRANSPORT_ERROR
+      }
+      .get()
   }
 
   override fun abortFullRestore(): Int {
     Log.i(TAG, "Aborting full restore")
-    return TRANSPORT_OK
+
+    return restoreManager.abortCurrentPackageRestore()
+      .map { TRANSPORT_OK }
+      .mapFailure {
+        Log.e(TAG, "Error aborting full restore", it)
+        TRANSPORT_ERROR
+      }
+      .get()
   }
 
   override fun finishRestore() {
     Log.i(TAG, "Finished restore")
+
+    restoreManager.finishRestore()
+      .mapFailure {
+        Log.e(TAG, "Error finishing restore", it)
+      }
   }
 }

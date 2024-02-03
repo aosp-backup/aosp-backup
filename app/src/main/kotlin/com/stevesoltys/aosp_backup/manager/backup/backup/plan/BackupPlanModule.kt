@@ -1,8 +1,8 @@
-package com.stevesoltys.aosp_backup.manager.location
+package com.stevesoltys.aosp_backup.manager.backup.backup.plan
 
 import android.content.Context
 import com.stevesoltys.aosp_backup.manager.configuration.ConfigurationManager
-import com.stevesoltys.aosp_backup.manager.location.saf.SAFBackupLocation
+import com.stevesoltys.aosp_backup.manager.backup.backup.plan.saf.SAFBackupPlan
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,17 +12,16 @@ import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
-class BackupLocationModule {
+class BackupPlanModule {
 
   @Provides
   @Singleton
   fun backupLocations(
-    @ApplicationContext
-    context: Context,
-    configurationManager: ConfigurationManager
-  ): List<BackupLocation> {
+    safBackupPlan: SAFBackupPlan
+  ): List<BackupPlan> {
+
     return listOf(
-      SAFBackupLocation(context, configurationManager)
+      safBackupPlan
     )
   }
 }

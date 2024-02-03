@@ -4,6 +4,7 @@ plugins {
   alias(libs.plugins.org.jetbrains.kotlin.android)
   alias(libs.plugins.org.jetbrains.kotlin.kapt)
   alias(libs.plugins.com.google.dagger.hilt.android)
+  idea
 }
 
 android {
@@ -31,6 +32,7 @@ android {
   }
 
   buildTypes {
+
     release {
       isMinifyEnabled = false
     }
@@ -53,7 +55,19 @@ android {
   }
 }
 
+idea {
+  module {
+    isDownloadSources = true
+  }
+}
+
 dependencies {
+  //noinspection UseTomlInstead
+  compileOnly("com.stevesoltys.aosp_backup:aosp:1.0.0")
+
+  // Tink
+  implementation(libs.tink.android)
+
   // Core dependencies
   implementation(libs.material)
   implementation(libs.androidx.core)
@@ -75,15 +89,6 @@ dependencies {
   implementation(libs.hilt)
   kapt(libs.hilt.compiler)
 
-  // Development Dependencies
-  val aospLibs = fileTree("$projectDir/libs") {
-    // out/target/common/obj/JAVA_LIBRARIES/framework-minus-apex_intermediates/classes.jar
-    include("android.jar")
-    // out/target/common/obj/JAVA_LIBRARIES/core-libart.com.android.art_intermediates/classes.jar
-    include("libcore.jar")
-  }
-  compileOnly(aospLibs)
-
   // Test dependencies
   testImplementation(libs.junit)
   testImplementation(libs.hilt.testing)
@@ -92,6 +97,10 @@ dependencies {
 
 hilt {
   enableAggregatingTask = true
+}
+
+tasks.withType<JavaCompile> {
+  dependsOn(":aosp:publishToMavenLocal")
 }
 
 tasks.register<Exec>("provisionEmulator") {
@@ -125,13 +134,40 @@ tasks.register<Exec>("startEmulator") {
 tasks.register<Exec>("installEmulatorRelease") {
   group = "emulator"
 
-  dependsOn(tasks.getByName("assembleRelease"))
+  dependsOn(tasks.getByName("assembleDebug"))
 
   doFirst {
     commandLine("${project.projectDir}/development/scripts/install_app.sh")
 
     environment("ANDROID_HOME", android.sdkDirectory.absolutePath)
     environment("JAVA_HOME", System.getProperty("java.home"))
+  }
+}
+
+val activityTasks = setOf(
+  ".ui.screen.settings.SettingsActivity",
+  ".ui.screen.initialize.InitializationActivity",
+  ".ui.screen.initialize.location.InitializeLocationActivity",
+  ".ui.screen.restore.RestoreActivity"
+)
+
+activityTasks.forEach {
+  val activityName = it.substringAfterLast(".")
+
+  tasks.register<Exec>("start$activityName") {
+    group = "emulator"
+
+    dependsOn(tasks.getByName("installEmulatorRelease"))
+
+    doFirst {
+      commandLine(
+        "${android.sdkDirectory.absolutePath}/platform-tools/adb",
+        "shell", "am", "start", "-n", "${android.namespace}/$it"
+      )
+
+      environment("ANDROID_HOME", android.sdkDirectory.absolutePath)
+      environment("JAVA_HOME", System.getProperty("java.home"))
+    }
   }
 }
 

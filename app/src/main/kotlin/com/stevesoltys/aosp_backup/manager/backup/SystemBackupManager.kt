@@ -1,26 +1,26 @@
 package com.stevesoltys.aosp_backup.manager.backup
 
-import android.app.backup.BackupObserver
 import android.app.backup.IBackupManager
 import android.app.backup.IBackupManagerMonitor
 import android.app.backup.IBackupObserver
+import android.app.backup.IRestoreObserver
+import android.app.backup.IRestoreSession
 import android.content.Context
-import android.content.Context.BACKUP_SERVICE
 import android.os.Bundle
 import android.os.ServiceManager
-import android.os.UserHandle
-import com.stevesoltys.aosp_backup.manager.backup.backup.BackupManager
-import com.stevesoltys.aosp_backup.manager.backup.backup.BackupProcessor
 import com.stevesoltys.aosp_backup.transport.AppBackupTransport
+import com.stevesoltys.aosp_backup.util.AOSP
+import com.stevesoltys.aosp_backup.util.AOSP.BACKUP_SERVICE
+import com.stevesoltys.aosp_backup.util.toSuccess
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.forkhandles.result4k.Result
-import dev.forkhandles.result4k.onFailure
 import dev.forkhandles.result4k.resultFrom
+import java.lang.RuntimeException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Manager class used for interacting with the system backup manager.
+ * Manager class used for interacting with the system [IBackupManager].
  */
 @Singleton
 class SystemBackupManager @Inject constructor(
@@ -39,22 +39,48 @@ class SystemBackupManager @Inject constructor(
     backupObserver: IBackupObserver,
     packages: List<String>
   ): Result<Unit, Exception> = resultFrom {
-    val userId = UserHandle.myUserId()
+    val userId = AOSP.myUserId()
 
     val backupMonitor = object : IBackupManagerMonitor.Stub() {
       override fun onEvent(bundle: Bundle) {}
     }
 
-    systemBackupManager.requestBackupForUser(
+    val result = systemBackupManager.requestBackupForUser(
       userId, packages.toTypedArray(), backupObserver, backupMonitor, 0
     )
+
+    if (result != 0) {
+      throw RuntimeException("Request backup failed for packages: '${packages}', result is: $result.")
+    }
+  }
+
+  fun beginRestoreSession(): Result<IRestoreSession, Exception> = resultFrom {
+    val userId = AOSP.myUserId()
+    val transportName = AppBackupTransport.getTransportName(context)
+
+    return systemBackupManager
+      .beginRestoreSessionForUser(userId, null, transportName)
+      ?.toSuccess() ?: throw IllegalStateException("Restore session is null.")
+  }
+
+  fun restorePackage(
+    session: IRestoreSession,
+    packageName: String,
+    backupObserver: IRestoreObserver
+  ): Result<Unit, Exception> = resultFrom {
+
+    val result = session.restorePackage(packageName, backupObserver, null)
+
+    if (result != 0) {
+      throw RuntimeException("Restore package for '$packageName' failed, result is: $result.")
+    }
   }
 
   /**
    * Tells the system to initialize the transport for the current user.
    */
   fun initializeBackupLocation(): Result<Unit, Exception> = resultFrom {
-    val userId = UserHandle.myUserId()
+    val userId = AOSP.myUserId()
     val transportIds = arrayOf(
       AppBackupTransport.getTransportName(context)
     )

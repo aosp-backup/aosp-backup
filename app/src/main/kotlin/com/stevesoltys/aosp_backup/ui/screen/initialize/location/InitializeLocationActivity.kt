@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stevesoltys.aosp_backup.R
-import com.stevesoltys.aosp_backup.manager.location.BackupLocationManager
+import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlanManager
 import com.stevesoltys.aosp_backup.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -40,17 +41,19 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class InitializeLocationActivity : ComponentActivity() {
 
+  private val viewModel: InitializeLocationViewModel by viewModels()
+
   @Inject
-  lateinit var backupLocationManager: BackupLocationManager
+  lateinit var backupPlanManager: BackupPlanManager
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     actionBar?.hide()
 
-    val backupLocations = backupLocationManager.backupLocationTypes().map {
+    val backupLocations = backupPlanManager.backupLocationTypes().map {
 
       val launcher = it.locationSelectionActivity(this) {
-        backupLocationManager.setBackupLocationType(it)
+        backupPlanManager.setBackupLocationType(it)
 
         Toast.makeText(this, "Backup location selected!", Toast.LENGTH_SHORT).show()
       }
@@ -84,6 +87,7 @@ class InitializeLocationActivity : ComponentActivity() {
             modifier = Modifier.fillMaxSize()
           ) {
             BackupLocationHeader()
+            RunBackupButton()
             BackupLocationList(backupLocations)
           }
         }
@@ -151,6 +155,28 @@ class InitializeLocationActivity : ComponentActivity() {
         color = MaterialTheme.colorScheme.onSecondaryContainer,
         fontSize = 18.sp,
       )
+    }
+  }
+
+  @Composable
+  private fun RunBackupButton() {
+    Column(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+      Button(
+        modifier = Modifier
+          .fillMaxWidth(0.75f)
+          .height(48.dp),
+        onClick = {
+          viewModel.runBackup()
+        },
+      ) {
+        Text(
+          text = "Run Backup"
+        )
+      }
+      Spacer(modifier = Modifier.height(64.dp))
     }
   }
 }

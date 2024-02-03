@@ -1,11 +1,11 @@
-package com.stevesoltys.aosp_backup.manager.location
+package com.stevesoltys.aosp_backup.manager.backup.backup.plan
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import dev.forkhandles.result4k.Result
 import java.io.OutputStream
 
-abstract class BackupLocation {
+abstract class BackupPlan {
 
   /**
    * Prompt the user to select a backup location.
@@ -29,7 +29,7 @@ abstract class BackupLocation {
 
   abstract fun excludedPackages(): List<String>
 
-  abstract fun type(): BackupLocationType
+  abstract fun type(): BackupPlanType
 
   abstract fun name(): String
 
