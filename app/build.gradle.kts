@@ -145,10 +145,12 @@ tasks.register<Exec>("installEmulatorRelease") {
 }
 
 val activityTasks = setOf(
+  ".ui.screen.main.MainActivity",
   ".ui.screen.settings.SettingsActivity",
   ".ui.screen.initialize.InitializationActivity",
   ".ui.screen.initialize.location.InitializeLocationActivity",
-  ".ui.screen.restore.RestoreActivity"
+  ".ui.screen.restore.RestoreActivity",
+  ".ui.screen.backup.BackupActivity"
 )
 
 activityTasks.forEach {

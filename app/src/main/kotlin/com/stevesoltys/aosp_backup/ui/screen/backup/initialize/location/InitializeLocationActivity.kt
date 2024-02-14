@@ -1,4 +1,4 @@
-package com.stevesoltys.aosp_backup.ui.screen.initialize.location
+package com.stevesoltys.aosp_backup.ui.screen.backup.initialize.location
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle

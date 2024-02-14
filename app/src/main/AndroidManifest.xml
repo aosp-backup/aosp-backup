@@ -43,11 +43,19 @@
       android:exported="true" />
 
     <activity
-      android:name=".ui.screen.initialize.InitializationActivity"
+      android:name=".ui.screen.backup.BackupActivity"
       android:exported="true" />
 
     <activity
-      android:name=".ui.screen.initialize.location.InitializeLocationActivity"
+      android:name=".ui.screen.backup.initialize.BackupInitializationActivity"
+      android:exported="true" />
+
+    <activity
+      android:name=".ui.screen.backup.initialize.password.BackupPasswordGeneratedActivity"
+      android:exported="true" />
+
+    <activity
+      android:name=".ui.screen.backup.initialize.location.InitializeLocationActivity"
       android:exported="true" />
 
     <activity

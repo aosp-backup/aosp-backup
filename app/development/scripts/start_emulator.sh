@@ -15,4 +15,4 @@ fi
 EMULATOR_NAME=$1
 
 echo "Starting emulator..."
-nohup $ANDROID_HOME/emulator/emulator -avd "$EMULATOR_NAME" -gpu swiftshader_indirect -writable-system >/dev/null 2>&1 &
+nohup $ANDROID_HOME/emulator/emulator -avd "$EMULATOR_NAME" -gpu swiftshader_indirect -no-snapshot-load -writable-system >/dev/null 2>&1 &

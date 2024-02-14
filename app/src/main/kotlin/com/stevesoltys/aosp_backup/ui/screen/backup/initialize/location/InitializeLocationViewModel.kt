@@ -1,4 +1,4 @@
-package com.stevesoltys.aosp_backup.ui.screen.initialize.location
+package com.stevesoltys.aosp_backup.ui.screen.backup.initialize.location
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

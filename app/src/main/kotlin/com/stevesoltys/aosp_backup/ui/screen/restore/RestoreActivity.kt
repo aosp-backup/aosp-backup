@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stevesoltys.aosp_backup.R
-import com.stevesoltys.aosp_backup.ui.screen.initialize.location.InitializeLocationEntry
+import com.stevesoltys.aosp_backup.ui.screen.backup.initialize.location.InitializeLocationEntry
 import com.stevesoltys.aosp_backup.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dev.forkhandles.result4k.mapFailure
