@@ -5,10 +5,16 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.stevesoltys.aosp_backup.R
 import com.stevesoltys.aosp_backup.manager.configuration.ConfigurationManager
 import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlan
 import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlanType
+import com.stevesoltys.aosp_backup.manager.backup.metadata.BackupFormat
+import com.stevesoltys.aosp_backup.manager.backup.metadata.BackupMetadata
+import com.stevesoltys.aosp_backup.manager.backup.metadata.toApkMetadata
+import com.stevesoltys.aosp_backup.manager.backup.metadata.toAppDataMetadata
+import com.stevesoltys.aosp_backup.manager.package_.PackageManager
 import com.stevesoltys.aosp_backup.manager.security.stream.EncryptedStreamManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.forkhandles.result4k.Result
@@ -25,7 +31,8 @@ class SAFBackupPlan @Inject constructor(
   @ApplicationContext
   private val context: Context,
   private val configurationManager: ConfigurationManager,
-  private val encryptedStreamManager: EncryptedStreamManager
+  private val encryptedStreamManager: EncryptedStreamManager,
+  private val packageManager: PackageManager
 ) : BackupPlan() {
 
   companion object {
@@ -70,6 +77,24 @@ class SAFBackupPlan @Inject constructor(
     val backupOutputStream = encryptedStreamManager.getBackupOutputStream(safOutputStream)
 
     this.backupOutputStream = ZipOutputStream(backupOutputStream)
+    writeMetadata()
+  }
+
+  private fun writeMetadata() {
+    val appMetadata = packageManager.getAppDataEligiblePackages(this).map { it.toAppDataMetadata() }
+    val apkMetadata = packageManager.getApkEligiblePackages().map { it.toApkMetadata() }
+
+    val metadata = BackupMetadata(
+      backupFormat = BackupFormat.ZIP_V1,
+      apps = appMetadata,
+      apks = apkMetadata
+    )
+
+    val mapper = jacksonObjectMapper()
+    val metadataEntry = ZipEntry(BackupMetadata.FILENAME)
+    backupOutputStream?.putNextEntry(metadataEntry)
+    backupOutputStream?.write(mapper.writeValueAsBytes(metadata))
+    backupOutputStream?.closeEntry()
   }
 
   override fun keyValueBackupOutputStream(identifier: String): OutputStream {

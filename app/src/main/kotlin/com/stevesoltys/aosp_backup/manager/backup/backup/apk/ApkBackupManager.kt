@@ -23,7 +23,7 @@ class ApkBackupManager @Inject constructor(
 
   fun backupApks(): Result<Unit, Exception> = resultFrom {
     val apkEligiblePackages = packageManager.getApkEligiblePackages()
-    val backupLocation = backupPlanManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupPlan()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     Log.i(TAG, "Backing up ${apkEligiblePackages.size} APK(s).")

@@ -3,6 +3,7 @@ package com.stevesoltys.aosp_backup.manager.backup.restore.plan
 import android.app.backup.RestoreSet
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import com.stevesoltys.aosp_backup.manager.backup.metadata.BackupMetadata
 import dev.forkhandles.result4k.Result
 import java.io.InputStream
 
@@ -16,7 +17,7 @@ abstract class RestorePlan {
     callback: (Boolean) -> Unit
   ): ActivityResultLauncher<Unit>
 
-  abstract fun getPackageList(): Result<List<String>, Exception>
+  abstract fun getBackupMetadata(): Result<BackupMetadata, Exception>
 
   abstract fun getRestoreSets(): Result<List<RestoreSet>, Exception>
 

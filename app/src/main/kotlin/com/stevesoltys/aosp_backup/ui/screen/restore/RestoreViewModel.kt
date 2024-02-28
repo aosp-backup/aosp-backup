@@ -36,17 +36,19 @@ class RestoreViewModel @Inject constructor(
   }
 
   fun runRestore(): Result<Unit, Exception> = resultFrom {
-    val restoreLocation = restorePlan
-      ?: throw IllegalStateException("Restore location is not initialized.")
+    val restorePlan = restorePlan ?: throw IllegalStateException("Restore location is not initialized.")
 
     viewModelScope.launch(Dispatchers.IO) {
-      val packages = restoreLocation.getPackageList()
+
+      val backupMetadata = restorePlan.getBackupMetadata()
         .onFailure {
           Log.e(TAG, "Failed to get package list", it.reason)
           return@launch
         }
 
-      restoreManager.runRestore(restoreLocation, packages)
+      val packages = backupMetadata.apps.map { it.packageName }
+
+      restoreManager.runRestore(restorePlan, packages)
         .mapFailure {
           Log.e(TAG, "Failed to run restore", it)
         }

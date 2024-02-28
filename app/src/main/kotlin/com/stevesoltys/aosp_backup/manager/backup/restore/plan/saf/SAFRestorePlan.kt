@@ -6,7 +6,9 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.stevesoltys.aosp_backup.R
+import com.stevesoltys.aosp_backup.manager.backup.metadata.BackupMetadata
 import com.stevesoltys.aosp_backup.manager.backup.restore.plan.PackageDataDescription
 import com.stevesoltys.aosp_backup.manager.backup.restore.plan.PackageDataType
 import com.stevesoltys.aosp_backup.manager.backup.restore.plan.PackageDataType.KEY_VALUE
@@ -41,7 +43,7 @@ class SAFRestorePlan @Inject constructor(
 
   private lateinit var restoreUri: Uri
 
-  private lateinit var packageList: List<String>
+  private lateinit var backupMetadata: BackupMetadata
 
   private lateinit var magicPackageManagerData: ByteArray
 
@@ -64,38 +66,32 @@ class SAFRestorePlan @Inject constructor(
     return magicPackageManagerData
   }
 
-  override fun getPackageList(): Result<List<String>, Exception> = resultFrom {
+  override fun getBackupMetadata(): Result<BackupMetadata, Exception> = resultFrom {
 
-    if (::packageList.isInitialized) {
-      return packageList.toSuccess()
-
-    } else {
-      packageList = mutableListOf()
+    if (::backupMetadata.isInitialized) {
+      return backupMetadata.toSuccess()
     }
 
     Log.i(TAG, "Reading package list from backup.")
     initializeInputStream()
 
     do {
-      val packageData = nextRestorePackage()
-        .onFailure { return it }
+      currentEntry = restoreInputStream.nextEntry
 
-      packageData?.let {
-        if (it.packageName == PACKAGE_MANAGER_SENTINEL) {
-          // If this is the package manager metadata, cache it.
-          magicPackageManagerData = getInputStream().readBytes()
+      if (currentEntry?.name == BackupMetadata.FILENAME) {
+        val metadata = restoreInputStream.readAllBytes()
+        val objectMapper = jacksonObjectMapper()
 
-        } else {
-          // Otherwise, add it to the package list.
-          packageList += it.packageName
-        }
+        backupMetadata = objectMapper.readValue(metadata, BackupMetadata::class.java)
+        break
       }
+
     } while (currentEntry != null)
 
     restoreInputStream.close()
 
-    Log.i(TAG, "Found ${packageList.size} packages in backup.")
-    return packageList.toSuccess()
+    Log.i(TAG, "Found ${backupMetadata.apps.size} packages in backup.")
+    return backupMetadata.toSuccess()
   }
 
   override fun getRestoreSets(): Result<List<RestoreSet>, Exception> {

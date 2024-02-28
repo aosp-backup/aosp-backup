@@ -45,7 +45,7 @@ class KeyValueBackupManager @Inject constructor(
   }
 
   private fun performBackup(packageInfo: PackageInfo, socket: ParcelFileDescriptor): KeyValueBackupResult {
-    val backupLocation = backupPlanManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupPlan()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     backupLocation.keyValueBackupOutputStream(packageInfo.packageName)

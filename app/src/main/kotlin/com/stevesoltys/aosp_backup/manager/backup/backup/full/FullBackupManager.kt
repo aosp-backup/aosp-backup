@@ -31,7 +31,7 @@ class FullBackupManager @Inject constructor(
       val inputStream = FileInputStream(socket.fileDescriptor)
 
       // Create the output stream from the backup location.
-      val outputStream = backupPlanManager.backupLocationType()
+      val outputStream = backupPlanManager.backupPlan()
         ?.fullBackupOutputStream(packageInfo.packageName)
         ?: throw IllegalStateException("Backup location is not initialized.")
 

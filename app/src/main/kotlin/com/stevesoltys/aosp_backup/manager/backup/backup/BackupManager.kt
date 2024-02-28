@@ -42,7 +42,7 @@ class BackupManager @Inject constructor(
    * Initialize the backup location for the current user.
    */
   fun initializeBackupLocation(): Result<Unit, Exception> = resultFrom {
-    val backupLocation = backupPlanManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupPlan()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     backupLocation.initializeLocation()
@@ -55,7 +55,7 @@ class BackupManager @Inject constructor(
    * We always have to include the package manager sentinel, since the metadata is used during restores.
    */
   fun runBackup(): Result<Unit, Exception> = resultFrom {
-    val packages = packageManager.getAppDataEligiblePackages()
+    val packages = packageManager.getAppDataEligiblePackages(backupPlanManager.backupPlan())
       .map { it.packageName }
       .plus(PACKAGE_MANAGER_SENTINEL)
 
@@ -75,7 +75,7 @@ class BackupManager @Inject constructor(
    * This will be called by a [BackupProcessor] when it is ready to start a backup.
    */
   fun initializeBackup(): Result<Unit, Exception> = resultFrom {
-    val backupLocation = backupPlanManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupPlan()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     Log.i(TAG, "Initializing backup.")
@@ -90,7 +90,7 @@ class BackupManager @Inject constructor(
    * This will be called by a [BackupProcessor] when it is ready to finalize a backup.
    */
   fun finalizeBackup(): Result<Unit, Exception> = resultFrom {
-    val backupLocation = backupPlanManager.backupLocationType()
+    val backupLocation = backupPlanManager.backupPlan()
       ?: throw IllegalStateException("Backup location is not initialized.")
 
     apkBackupManager.backupApks().mapFailure {

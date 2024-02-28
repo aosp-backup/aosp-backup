@@ -14,7 +14,7 @@ class BackupPlanManager @Inject constructor(
 ) {
 
   companion object {
-    const val PREF_BACKUP_LOCATION_TYPE = "backup_location_type"
+    const val BACKUP_PLAN_TYPE = "backup_location_type"
   }
 
   fun backupLocationTypes(): List<BackupPlan> {
@@ -28,15 +28,15 @@ class BackupPlanManager @Inject constructor(
    */
   fun setBackupLocationType(backupPlan: BackupPlan) {
     configurationManager.setPreference(
-      PREF_BACKUP_LOCATION_TYPE,
+      BACKUP_PLAN_TYPE,
       backupPlan.type().name
     )
 
     systemBackupManager.initializeBackupLocation()
   }
 
-  fun backupLocationType(): BackupPlan? {
-    val locationType = configurationManager.getPreference(PREF_BACKUP_LOCATION_TYPE) ?: return null
+  fun backupPlan(): BackupPlan? {
+    val locationType = configurationManager.getPreference(BACKUP_PLAN_TYPE) ?: return null
 
     return backupPlans.firstOrNull {
       it.type() == BackupPlanType.valueOf(locationType)
@@ -44,6 +44,6 @@ class BackupPlanManager @Inject constructor(
   }
 
   fun isBackupLocationInitialized(): Boolean {
-    return backupLocationType() != null
+    return backupPlan() != null
   }
 }

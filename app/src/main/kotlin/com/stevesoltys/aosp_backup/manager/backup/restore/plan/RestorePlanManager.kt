@@ -10,8 +10,5 @@ class RestorePlanManager @Inject constructor(
   private val safRestorePlan: SAFRestorePlan
 ) {
 
-  fun restorePlanList(): List<RestorePlan> =
-    listOf(
-      safRestorePlan
-    )
+  fun restorePlanList(): List<RestorePlan> = listOf(safRestorePlan)
 }

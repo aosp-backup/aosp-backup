@@ -74,6 +74,7 @@ dependencies {
   implementation(libs.androidx.preference)
   implementation(libs.result4k)
   implementation(libs.apache.commons.compress)
+  implementation(libs.jackson.kotlin)
 
   // Compose dependencies
   implementation(platform(libs.androidx.compose.bom))

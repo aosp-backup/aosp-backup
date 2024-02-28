@@ -7,7 +7,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.GET_INSTRUMENTATION
 import android.util.Log
-import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlanManager
+import com.stevesoltys.aosp_backup.manager.backup.backup.plan.BackupPlan
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,8 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class PackageManager @Inject constructor(
   @ApplicationContext
-  private val context: Context,
-  private val backupPlanManager: BackupPlanManager
+  private val context: Context
 ) {
 
   private val systemPackageManager: PackageManager = context.packageManager
@@ -25,13 +24,11 @@ class PackageManager @Inject constructor(
     private val TAG = PackageManager::class.java.simpleName
   }
 
-  fun getAppDataEligiblePackages(): List<PackageInfo> {
-    val backupLocation = backupPlanManager.backupLocationType()
-
+  fun getAppDataEligiblePackages(backupPlan: BackupPlan?): List<PackageInfo> {
     // Exclude our package, as well as any packages excluded by the backup location.
     val excludedPackages = listOf(
       context.packageName
-    ) + backupLocation?.excludedPackages().orEmpty()
+    ) + backupPlan?.excludedPackages().orEmpty()
 
     Log.i(TAG, "Excluding $excludedPackages package(s) from backup.")
 
